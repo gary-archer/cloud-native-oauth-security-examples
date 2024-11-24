@@ -19,7 +19,7 @@ curl -i -k http://localhost:3000/products
 
 ## Kubernetes Deployment Settings
 
-The API uses a sidecar managed by Istio, with a SPIRE identity, to require mutual TLS for inbound connections.\ 
+The API uses a sidecar managed by Istio, with a SPIRE identity, to require mutual TLS for inbound connections.\
 The API also downloads SPIRE certificates from the workload API, and uses it in outbound JDBC connections.
 
 ```yaml
@@ -84,7 +84,7 @@ The call from the API to the database uses SPIFFE certificates:
 curl -i -k https://api.democluster.example/products
 ```
 
-To call the API inside the cluster, get a shell to the another pod:
+To call the API inside the cluster, get a shell to another pod:
 
 ```bash
 OAUTHCLIENT=$(kubectl -n applications get pods --selector='app=oauthclient' -o=name)
