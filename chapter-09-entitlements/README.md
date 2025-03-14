@@ -31,7 +31,7 @@ On Windows, use a `Run as administrator` shell in order to run the load balancer
 
 ### Deploy the API gateway
 
-Then run another shell to create an ingress and use the same cluster name.\
+Then run another shell to create an ingress.\
 On macOS accept the prompt to allow the load balancer to accept connections.\
 Note the external IP address that the script outputs:
 
@@ -83,7 +83,8 @@ Deploy the example API from [chapter 5](/chapter-05-secure-api-development/), ru
 ./5-deploy-api-with-opa.sh
 ```
 
-- Locate the API endpoint at `https://api.democluster.example/orders`
+- Locate the API endpoint at `https://api.democluster.example/orders`.
+- If you run into external connectivity problems, see the [Connectivity README](../resources/loadbalancer/README.md) document.
 
 The API queries OPA for the authorization decision. OPA runs as a sidecar on the same pod as the API and points to the policy retrieval point to get its policy. The API can communicate with the OPA over its local interface. See an excerpt from the deployment file (`chapter-05-secure-api-development/deployment/kubernetes/deployment.yaml`).
 
@@ -126,7 +127,7 @@ Run a simple console app client that invokes the system browser:
 
 Log in with a username and password using the following test credential:
 
-- bob / Password1
+- dana / Password1
 
 The console app gets an access token and makes two secured API requests.\
 The first API request is authorized, whereas the second is for an unauthorized order ID.\
