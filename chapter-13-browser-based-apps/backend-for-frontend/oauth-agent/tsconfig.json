@@ -2,11 +2,11 @@
     "compilerOptions": {
         "strict": true,
         "sourceMap": true,
-        "target": "ES2022",
+        "target": "ES2024",
         "outDir": "./dist",
         "baseUrl": "./src",
-        "module": "ES2022",
-        "moduleResolution": "Node",
+        "module": "node20",
+        "moduleResolution": "node16",
         "allowSyntheticDefaultImports": true
     },
     "include": [

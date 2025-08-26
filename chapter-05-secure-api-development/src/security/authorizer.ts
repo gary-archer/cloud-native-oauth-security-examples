@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-import {OrderDetails} from '../entities/orderDetails';
-import {AuthorizationResult} from './authorizationResult';
+import {OrderDetails} from '../entities/orderDetails.js';
+import {AuthorizationResult} from './authorizationResult.js';
 
 /*
  * An interface to represent the authorization decisions the API is responsible for making
