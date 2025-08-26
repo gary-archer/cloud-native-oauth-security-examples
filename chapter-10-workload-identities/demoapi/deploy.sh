@@ -22,7 +22,7 @@ fi
 #
 # Build the API Docker file
 #
-docker build -t demoapi:v1 .
+docker build --no-cache -t demoapi:v1 .
 if [ $? -ne 0 ]; then
   echo '*** Problem encountered building the demo API docker image'
   exit 1

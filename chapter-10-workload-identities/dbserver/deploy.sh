@@ -15,7 +15,7 @@ kubectl create namespace applications
 #
 # Build the database server custom docker image and load it into the KIND docker registry
 #
-docker build -t dbserver:v1 .
+docker build --no-cache -t dbserver:v1 .
 if [ $? -ne 0 ]; then
   echo '*** Problem encountered building the database server docker image'
   exit 1
