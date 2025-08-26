@@ -11,23 +11,11 @@
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 #
-# Point to the OpenSSL configuration file
+# Ensure the correct OpenSSL behavior on Windows
 #
-case "$(uname -s)" in
-
-  Darwin)
-    export OPENSSL_CONF='/System/Library/OpenSSL/openssl.cnf'
- 	;;
-
-  Linux)
-    export OPENSSL_CONF='/usr/lib/ssl/openssl.cnf';
- 	;;
-
-  MINGW64*)
-    export OPENSSL_CONF='C:/Program Files/Git/usr/ssl/openssl.cnf';
-    export MSYS_NO_PATHCONV=1;
-	;;
-esac
+if [[ "$(uname -s)" == MINGW64* ]]; then
+  export MSYS_NO_PATHCONV=1
+fi
 
 #
 # Return if already created, to prevent the need to reconfigure trust on every deployment

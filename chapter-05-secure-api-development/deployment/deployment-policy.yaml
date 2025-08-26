@@ -39,7 +39,7 @@ spec:
               value: "http://127.0.0.1:8181/v1/data/orders/allow"
       initContainers:
         - name: policyengine
-          image: openpolicyagent/opa:1.3.0
+          image: openpolicyagent/opa:1.7.1
           restartPolicy: Always
           args:
             - "run"

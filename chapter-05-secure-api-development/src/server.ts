@@ -30,14 +30,14 @@ const controller = await objectFactory.initialize();
 // Configure OAuth middleware
 const application = express();
 const oauthFilter = new OAuthFilter(configuration, objectFactory);
-application.use('/*', ErrorHandler.catch(oauthFilter.validateAccessToken));
+application.use('/*_', ErrorHandler.catch(oauthFilter.validateAccessToken));
 
 // Configure API routes
 application.get('/orders', ErrorHandler.catch(controller.listOrders));
 application.get('/orders/:id/details', ErrorHandler.catch(controller.getOrderDetails));
 
 // Configure an unhandled exception handler
-application.use('/*', ErrorHandler.onUnhandledException);
+application.use('/*_', ErrorHandler.onUnhandledException);
 
 // Start listening for API requests
 application.listen(configuration.port, () => {
