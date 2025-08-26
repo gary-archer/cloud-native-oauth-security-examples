@@ -1,13 +1,13 @@
 {
     "compilerOptions": {
         "strict": true,
-        "sourceMap": true,
         "target": "ES2024",
-        "outDir": "./dist",
-        "baseUrl": "./src",
+        "lib": ["ES2024"],
         "module": "node20",
         "moduleResolution": "node16",
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "outDir": "./dist",
+        "sourceMap": true
     },
     "include": [
         "src/**/*.ts"
