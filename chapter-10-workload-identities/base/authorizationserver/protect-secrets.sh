@@ -16,7 +16,7 @@ if [[ "$(uname -s)" == MINGW64* ]]; then
   # Ensure the correct OpenSSL behavior on Windows
   export MSYS_NO_PATHCONV=1
 
-  # Fix problems with trailing newline characters in Docker scripts downloaded from Git
+  # Fix problems with trailing newline characters in Docker bash scripts downloaded from Git
   sed -i 's/\r$//' encrypt-util.sh
 
   # Use the Windows line separator
