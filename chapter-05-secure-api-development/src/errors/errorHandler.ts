@@ -25,25 +25,10 @@ export class ErrorHandler {
     /*
      * Catch thrown exceptions
      */
-    public static onUnhandledException(unhandledException: any, request: Request, response: Response): void {
+    public static onUnhandledException(unhandledException: any, request: Request, response: Response, next: NextFunction): void {
 
         const apiError = ErrorHandler.getApiError(unhandledException);
         ErrorHandler.writeErrorResponse(apiError, response);
-    }
-
-    /*
-     * Express does not catch exceptions in async handlers so we use this override
-     */
-    public static catch(fn: any): any {
-
-        return (request: Request, response: Response, next: NextFunction) => {
-
-            Promise
-                .resolve(fn(request, response, next))
-                .catch((e) => {
-                    ErrorHandler.onUnhandledException(e, request, response);
-                });
-        };
     }
 
     /*
