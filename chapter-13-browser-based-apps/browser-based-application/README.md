@@ -5,7 +5,7 @@ The access token is transported using an HTTP-only cookie, to help reduce XSS th
 
 ## Overview
 
-Install Node.js 20 or later and then use the following commands to run the app.\
+Install Node.js 22 or later and then use the following commands to run the app.\
 The webpack dev server runs at `https://www.webapp.example:3000` to serve the app's static content:
 
 ```bash

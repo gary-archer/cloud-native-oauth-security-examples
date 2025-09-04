@@ -39,9 +39,8 @@ const corsConfiguration = {
 
 app.use(cors(corsConfiguration))
 app.use(cookieParser())
-app.use('*', express.json())
-app.use('*', loggingMiddleware)
-app.use('*', exceptionMiddleware)
+app.use('*_', express.json())
+app.use('*_', loggingMiddleware)
 app.set('etag', false)
 
 const remoteJWKSet = createRemoteJWKSet(new URL(config.jwksEndpoint));
@@ -56,6 +55,8 @@ const controllers = {
 for (const [path, controller] of Object.entries(controllers)) {
     app.use(config.endpointsPrefix + path, controller.router)
 }
+
+app.use('*_', exceptionMiddleware)
 
 if (config.serverCertPath) {
 

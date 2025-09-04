@@ -2,7 +2,7 @@
 # A custom Docker image for the database server with tools to enable it to detect newly downloaded SVIDs
 #
 
-FROM postgres:17.2
+FROM postgres:17.6
 
 RUN apt-get update && apt-get install -y inotify-tools
 

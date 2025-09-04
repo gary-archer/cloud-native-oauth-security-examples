@@ -49,7 +49,7 @@ REQUIRED_SCOPE='retail/orders'
 
 ### Start the API
 
-Ensure that you have Node.js 20 or later installed.\
+Ensure that you have Node.js 22 or later installed.\
 Then build and run the API, which listens on `http://localhost:3000`:
 
 ```bash

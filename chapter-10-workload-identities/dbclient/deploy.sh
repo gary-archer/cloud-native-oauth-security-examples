@@ -14,7 +14,7 @@ kubectl create namespace applications
 #
 # Build the main Docker image, which is used to manually call the database server
 #
-docker build -t dbclient:v1 .
+docker build --no-cache -t dbclient:v1 .
 if [ $? -ne 0 ]; then
   echo '*** Problem encountered building the dbclient docker image'
   exit 1

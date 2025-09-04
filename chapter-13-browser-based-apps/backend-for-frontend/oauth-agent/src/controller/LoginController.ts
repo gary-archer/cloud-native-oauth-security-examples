@@ -30,7 +30,6 @@ import {
 } from '../lib/index.js'
 import {config} from '../config.js'
 import validateExpressRequest from '../validateExpressRequest.js'
-import {asyncCatch} from '../middleware/exceptionMiddleware.js'
 
 class LoginController {
     
@@ -39,8 +38,8 @@ class LoginController {
 
     constructor(remoteJwkSet: JWTVerifyGetKey) {
         this.remoteJwkSet = remoteJwkSet
-        this.router.post('/start', asyncCatch(this.startLogin))
-        this.router.post('/end', asyncCatch(this.endLogin))
+        this.router.post('/start', this.startLogin)
+        this.router.post('/end', this.endLogin)
     }
 
     /*
