@@ -14,7 +14,7 @@ kubectl create namespace applications
 #
 # Build a utility Docker image, that will use its SPIFFE workload identity as a credential
 #
-docker build -t oauthclient:v1 .
+docker build --no-cache -t oauthclient:v1 .
 if [ $? -ne 0 ]; then
   echo '*** Problem encountered building the oauthclient docker image'
   exit 1

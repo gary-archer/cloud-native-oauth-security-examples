@@ -26,7 +26,7 @@ export async function getOrders(): Promise<Order[]> {
 }
 
 export async function getUserInfo(): Promise<UserInfo> {
-    return await makeApiRequest({name: IpcEventNames.ApiOrders}) as UserInfo;
+    return await makeApiRequest({name: IpcEventNames.UserInfo}) as UserInfo;
 }
 
 /*

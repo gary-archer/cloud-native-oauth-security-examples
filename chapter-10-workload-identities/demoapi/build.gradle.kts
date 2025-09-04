@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.0.20"
+    kotlin("jvm") version "2.2.10"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -13,12 +13,12 @@ repositories {
 dependencies {
     // Application depenencies
     implementation("com.sparkjava:spark-core:2.9.4")
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("org.slf4j:slf4j-simple:2.0.9")
+    implementation("com.google.code.gson:gson:2.13.1")
+    implementation("org.slf4j:slf4j-simple:2.0.17")
     
     // Postgres and SPIFFE dependencies
-    runtimeOnly("org.postgresql:postgresql:42.7.2")
-    runtimeOnly("io.spiffe:java-spiffe-provider:0.8.11")
+    runtimeOnly("org.postgresql:postgresql:42.7.7")
+    runtimeOnly("io.spiffe:java-spiffe-provider:0.8.12")
 }
 
 java {

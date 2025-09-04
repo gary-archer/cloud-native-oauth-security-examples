@@ -18,7 +18,7 @@ First ensure that you have these tools installed:
 - [kubectl](https://kubernetes.io/docs/tasks/tools)
 - [Helm](https://helm.sh/docs/intro/install)
 - [jq](https://jqlang.github.io/jq/download)
-- [Open Policy Agent](https://www.openpolicyagent.org/docs/latest/#running-opa)
+- [Open Policy Agent](https://www.openpolicyagent.org/docs#running-opa)
 
 ### Create the Cluster
 
@@ -201,8 +201,8 @@ INPUT='{
 }'
 
 curl -X POST http://127.0.0.1:8181/v1/data/orders/allow \
--H 'content-type: application/json' \
--d "$INPUT"
+  -H 'content-type: application/json' \
+  -d "$INPUT"
 ```
 
 The following is a response to the query `is this user allowed to list orders?` where the access token in `accessToken` contains the details about the user, `action` is `list`,  and `type` is `order`. The policy allows the request with a condition. The user is allowed to list orders but only for their own customer ID:

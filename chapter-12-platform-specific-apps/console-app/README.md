@@ -7,7 +7,7 @@ A simple console app that runs a code flow to authenticate a user and get an acc
 ## Prerequisites
 
 First run [deployment scripts](../README.md) to run backend components in a local Kubernetes cluster.\
-Install Node.js 20 or later, then trust the authorization server and API certificates:
+Install Node.js 22 or later, then trust the authorization server and API certificates:
 
 ```bash
 export NODE_EXTRA_CA_CERTS='../../resources/apigateway/external-certs/democluster.ca.pem'

@@ -29,7 +29,7 @@ import {UserInfoView} from './userInfo/userInfoView';
 /*
  * The React app
  */
-export function App(): JSX.Element {
+export function App() {
 
     const [isInitialized, setIsInitialized] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);

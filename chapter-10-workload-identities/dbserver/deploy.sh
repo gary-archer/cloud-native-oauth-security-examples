@@ -13,9 +13,16 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 kubectl create namespace applications
 
 #
+# Fix problems with trailing newline characters in Docker bash scripts downloaded from Git
+#
+if [[ "$(uname -s)" == MINGW64* ]]; then
+  sed -i 's/\r$//' init-dbserver.sh
+fi
+
+#
 # Build the database server custom docker image and load it into the KIND docker registry
 #
-docker build -t dbserver:v1 .
+docker build --no-cache -t dbserver:v1 .
 if [ $? -ne 0 ]; then
   echo '*** Problem encountered building the database server docker image'
   exit 1

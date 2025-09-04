@@ -10,7 +10,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 # Build the Docker image
 #
 cd ..
-docker build -f deployment/Dockerfile -t minimalapi:1.0.0 .
+docker build --no-cache -f deployment/Dockerfile -t minimalapi:1.0.0 .
 if [ $? -ne 0 ]; then
   echo 'Problem encountered building the API docker image'
   exit 1

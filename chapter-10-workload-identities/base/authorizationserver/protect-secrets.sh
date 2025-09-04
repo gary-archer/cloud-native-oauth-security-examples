@@ -8,34 +8,15 @@
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 #
-# Get the platform
-#
-case "$(uname -s)" in
-
-  Darwin)
-    PLATFORM="MACOS"
-    export OPENSSL_CONF='/System/Library/OpenSSL/openssl.cnf'
- 	;;
-
-  MINGW64*)
-    PLATFORM="WINDOWS"
-    export OPENSSL_CONF='C:/Program Files/Git/usr/ssl/openssl.cnf';
-    export MSYS_NO_PATHCONV=1;
-	;;
-
-  Linux)
-    PLATFORM="LINUX"
-    export OPENSSL_CONF='/usr/lib/ssl/openssl.cnf';
-	;;
-esac
-
-#
 # Windows specific fixes
 #
 LINE_SEPARATOR='\n';
-if [ "$PLATFORM" == 'WINDOWS' ]; then
-  
-  # Fix problems with trailing newline characters in Docker scripts downloaded from Git
+if [[ "$(uname -s)" == MINGW64* ]]; then
+
+  # Ensure the correct OpenSSL behavior on Windows
+  export MSYS_NO_PATHCONV=1
+
+  # Fix problems with trailing newline characters in Docker bash scripts downloaded from Git
   sed -i 's/\r$//' encrypt-util.sh
 
   # Use the Windows line separator
