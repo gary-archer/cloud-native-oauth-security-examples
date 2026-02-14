@@ -31,7 +31,7 @@ http.createServer((request, response) => {
             message = 'API received an opaque access token';
         }
     } else {
-        message = 'API received an opaque access token';
+        message = 'API did not receive an access token';
     }
 
     response.setHeader('content-type', 'application/json');

@@ -14,7 +14,7 @@
         "delete": "tsx src/delete.ts"
     },
     "dependencies": {
-        "axios": "^1.11.0",
+        "axios": "^1.13.5",
         "fs-extra": "^11.3.0"
     },
     "devDependencies": {

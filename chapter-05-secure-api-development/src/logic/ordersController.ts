@@ -48,7 +48,8 @@ export class OrdersController {
      */
     public async getOrderDetails(request: Request, response: Response) : Promise<void> {
 
-        const result = await this.service.getOrderDetails(request.params.id, response.locals.authorizer);
+        const id = request.params.id as string;
+        const result = await this.service.getOrderDetails(id, response.locals.authorizer);
         if (result.error) {
             const error = new ApiError(404, 'not_found', 'Resource not found for user', result.error);
             ErrorHandler.writeErrorResponse(error, response);
