@@ -29,7 +29,7 @@ policy += " script-src 'self';";
 policy += " connect-src 'self' https://api.webapp.example;";
 policy += " child-src 'self';";
 policy += " img-src 'self';";
-policy += " style-src 'self' https://cdn.jsdelivr.net;";
+policy += " style-src 'self';";
 policy += " object-src 'none';";
 policy += " frame-ancestors 'none';";
 policy += " base-uri 'self';";
@@ -51,10 +51,13 @@ let devServer: WebpackDevServerConfiguration = {
     historyApiFallback: {
         index: 'index.html'
     },
-    hot: true,
     allowedHosts: [
         'www.webapp.example'
     ],
+    open: 'https://www.webapp.example:3000',
+    devMiddleware: {
+        writeToDisk: true,
+    },
     /*
     * During development the app sets a strong content security policy.
     * Equivalent headers should also be set when the SPA is deployed to its production web host.
