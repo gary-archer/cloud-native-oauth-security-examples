@@ -31,7 +31,7 @@ fi
 #
 # Install SPIRE components with settings in the values file that enable Istio integration
 #
-helm upgrade --install -n spire-server spire spire --repo https://spiffe.github.io/helm-charts-hardened/ --values=helm-values.yaml --version 0.26.1
+helm upgrade --install -n spire-server spire spire --repo https://spiffe.github.io/helm-charts-hardened/ --values=helm-values.yaml --version 0.28.1
 if [ $? -ne 0 ]; then
   echo '*** Problem encountered deploying SPIRE custom resource definitions'
   exit 1
