@@ -10,12 +10,9 @@
         "node": ">=22"
     },
     "scripts": {
-        "start": "npm run clean && npm run copy && npm run webpackMain && npm run webpackRenderer && npm run go",
-        "clean": "rm -rf dist",
-        "copy": "mkdir dist && cp package.json index.html app.css src/preload.js dist",
+        "start": "npm run webpackMain && npm run webpackRenderer && npx electron ./dist",
         "webpackMain": "NODE_OPTIONS='--import tsx' webpack --config webpack/main.ts",
-        "webpackRenderer": "NODE_OPTIONS='--import tsx' webpack --config webpack/renderer.ts",
-        "go": "electron ./dist"
+        "webpackRenderer": "NODE_OPTIONS='--import tsx' webpack --config webpack/renderer.ts"
     },
     "dependencies": {
         "axios": "^1.13.5",
@@ -29,7 +26,8 @@
         "@types/node": "^22.15.18",
         "@types/react": "^19.2.4",
         "@types/react-dom": "^19.2.3",
-        "electron": "^40.0.0",
+        "copy-webpack-plugin": "^13.0.1",
+        "electron": "^40.4.1",
         "ts-loader": "^9.5.2",
         "tsx": "^4.20.3",
         "typescript": "5.9.2",

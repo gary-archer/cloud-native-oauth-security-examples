@@ -1,3 +1,4 @@
+import CopyPlugin from 'copy-webpack-plugin';
 import path from 'path';
 import webpack from 'webpack';
 
@@ -7,10 +8,10 @@ const config: webpack.Configuration = {
     target: 'web',
     mode: 'development',
     devtool: 'source-map',
-    context: path.resolve(dirname, './src'),
+    context: path.resolve(dirname, '.'),
 
     entry: {
-        app: ['./renderer.tsx']
+        app: ['./src/renderer.tsx']
     },
     
     module: {
@@ -32,10 +33,16 @@ const config: webpack.Configuration = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js']
     },
+
+    experiments: {
+        outputModule: true,
+    },
     
     output: {
         path: path.resolve(dirname, './dist'),
         filename: '[name].bundle.js',
+        module: true,
+        clean: false,
     },
     
     optimization: {
@@ -49,7 +56,23 @@ const config: webpack.Configuration = {
                 },
             }
         }
-    }
+    },
+
+    plugins: [
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: 'index.html',
+                    to: path.resolve('dist'),
+                },
+                {
+                    from: 'css',
+                    to: path.resolve('dist'),
+                },
+            ]
+        }),
+    ]
 }
 
 export default config;

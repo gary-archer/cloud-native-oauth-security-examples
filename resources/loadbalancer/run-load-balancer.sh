@@ -17,7 +17,7 @@ fi
 #
 # Calculate operating system specific values
 #
-VERSION='0.7.0'
+VERSION='0.10.0'
 if [ "$(uname -m)" == 'arm64' ]; then
   ARCH='arm64'
 else
@@ -81,7 +81,7 @@ elif [ "$PLATFORM" == 'windows' ]; then
   # On Windows, make sure you run from an administrator shell
   #
   echo 'Running a Windows administrator shell so that cloud-provider-kind can update the local loopback network ...'
-  ./cloud-provider-kind
+  ./cloud-provider-kind --gateway-channel disabled
 else
   
   #

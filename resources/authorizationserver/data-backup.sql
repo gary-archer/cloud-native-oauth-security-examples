@@ -110,7 +110,6 @@ CREATE TABLE accounts (
   account_id  VARCHAR(64)   PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
   tenant_id   VARCHAR(64),
   username    VARCHAR(64)   NOT NULL,
-  password    VARCHAR(128),
   email       VARCHAR(64),
   phone       VARCHAR(32),
   attributes  JSONB,
@@ -133,7 +132,6 @@ CREATE INDEX IDX_ACCOUNTS_ATTRIBUTES_NAME ON accounts USING GIN ( (attributes->'
 COMMENT ON COLUMN accounts.account_id IS 'Account id, or username, of this account. Unique.';
 COMMENT ON COLUMN accounts.tenant_id IS 'The tenant ID of this account. Unique in combination with username, phone, email.';
 COMMENT ON COLUMN accounts.username IS 'The username of this account. Unique in combination with tenant_id.';
-COMMENT ON COLUMN accounts.password IS 'The hashed password. Optional';
 COMMENT ON COLUMN accounts.email IS 'The associated email address. Unique in combination with tenant_id. Optional';
 COMMENT ON COLUMN accounts.phone IS 'The phone number of the account owner. Unique in combination with tenant_id. Optional';
 COMMENT ON COLUMN accounts.attributes IS 'Key/value map of additional attributes associated with the account.';
@@ -345,6 +343,7 @@ CREATE TABLE buckets (
     attributes JSONB        NOT NULL,
     created    TIMESTAMP    NOT NULL,
     updated    TIMESTAMP    NOT NULL,
+    expires    TIMESTAMP    NULL,
 
     PRIMARY KEY (id)
 );
@@ -353,6 +352,7 @@ CREATE UNIQUE INDEX IDX_BUCKETS_TENANT_SUBJECT_PURPOSE on buckets (tenant_id, su
 CREATE UNIQUE INDEX IDX_BUCKETS_TENANT_SUBJECT_PURPOSE_DEFAULT on buckets (subject, purpose) WHERE tenant_id IS NULL;
 
 CREATE INDEX IDX_BUCKETS_ATTRIBUTES ON buckets USING GIN (attributes);
+CREATE INDEX "IDX_BUCKETS_EXPIRES" ON buckets (expires);
 
 COMMENT ON COLUMN buckets.id IS 'Unique ID of the bucket';
 COMMENT ON COLUMN buckets.subject IS 'The subject that together with the purpose identify this bucket';
@@ -361,13 +361,183 @@ COMMENT ON COLUMN buckets.tenant_id IS 'The tenant ID of this bucket';
 COMMENT ON COLUMN buckets.attributes IS 'All attributes stored for this subject/purpose';
 COMMENT ON COLUMN buckets.created IS 'When this bucket was created';
 COMMENT ON COLUMN buckets.updated IS 'When this bucket was last updated';
+COMMENT ON COLUMN buckets.expires IS 'When this bucket expires, or NULL if it does not expire';
+
+CREATE TABLE IF NOT EXISTS database_service_providers
+(
+    id                          VARCHAR(64)       NOT NULL,
+    profile_id                  VARCHAR(64)       NOT NULL,
+    service_provider_name       VARCHAR(128)      NULL,
+    created                     TIMESTAMP         NOT NULL,
+    updated                     TIMESTAMP         NOT NULL,
+    owner                       VARCHAR(128)      NOT NULL,
+    enabled                     VARCHAR(16)       NOT NULL DEFAULT 'enabled',
+    service_provider_metadata   JSONB             NOT NULL DEFAULT '{}',
+    configuration_references    JSONB             NOT NULL DEFAULT '{}',
+    attributes                  JSONB             NOT NULL DEFAULT '{}',
+
+    PRIMARY KEY (id, profile_id)
+);
+
+COMMENT ON COLUMN database_service_providers.id IS 'The service provider ID of this service provider instance';
+COMMENT ON COLUMN database_service_providers.profile_id IS 'The profile ID owning this service provider instance';
+COMMENT ON COLUMN database_service_providers.service_provider_name IS 'The optional database service provider display name';
+COMMENT ON COLUMN database_service_providers.created IS 'When this service provider was originally created (in UTC time)';
+COMMENT ON COLUMN database_service_providers.updated IS 'When this service provider was last updated (in UTC time)';
+COMMENT ON COLUMN database_service_providers.owner IS 'The owner of the database service provider. This is the user or service provider who has administrative rights on the database service provider';
+COMMENT ON COLUMN database_service_providers.service_provider_metadata IS 'Metadata, as a JSON document, tied to this service provider, especially tags categorizing it';
+COMMENT ON COLUMN database_service_providers.configuration_references IS 'JSON document with all attributes referencing an item in the configuration';
+COMMENT ON COLUMN database_service_providers.attributes IS 'Canonical object representing this service provider';
+
+CREATE INDEX IF NOT EXISTS IDX_DBSP_PROFILE_ID ON database_service_providers (profile_id);
+CREATE INDEX IF NOT EXISTS IDX_DBSP_SERVICE_PROVIDER_NAME ON database_service_providers (service_provider_name);
+CREATE INDEX IF NOT EXISTS IDX_DBSP_OWNER ON database_service_providers (owner);
+
+CREATE TABLE entities
+(
+    id                            VARCHAR(64)  NOT NULL PRIMARY KEY,
+    tenant_id                     VARCHAR(64)  NULL,
+    context_id                    VARCHAR(64)  NOT NULL,
+    type                          VARCHAR(64)  NOT NULL,
+    value                         VARCHAR(512) NOT NULL,
+    display_name                  VARCHAR(255) NULL,
+    versions                      JSONB        NOT NULL,
+    attributes                    JSONB        NULL,
+    external_id                   VARCHAR(64)  NULL,
+    created                       TIMESTAMP    NOT NULL,
+    updated                       TIMESTAMP    NOT NULL,
+    deleted                       TIMESTAMP    NULL,
+    version                       VARCHAR(64)  NOT NULL DEFAULT '1',
+    CONSTRAINT "FK_ENTITIES_CONTEXT_ID" FOREIGN KEY (context_id) REFERENCES entities (id)
+);
+
+CREATE UNIQUE INDEX "IDX_ENTITIES_BUSINESS_KEY" ON entities (tenant_id, context_id, type, value);
+CREATE UNIQUE INDEX "IDX_ENTITIES_BUSINESS_KEY_DEFAULT" ON entities (context_id, type, value) WHERE tenant_id IS NULL;
+CREATE INDEX "IDX_ENTITIES_TENANT_TYPE_VALUE" ON entities (tenant_id, type, value);
+CREATE INDEX "IDX_ENTITIES_TENANT_TYPE_VALUE_DEFAULT" ON entities (type, value) WHERE tenant_id IS NULL;
+CREATE INDEX "IDX_ENTITIES_EXTERNAL_ID" ON entities (external_id);
+-- Postgres does not automatically create an index for foreign keys, the index must be created by hand for improved performance.
+CREATE INDEX "IDX_ENTITIES_CONTEXT_ID" ON entities (context_id);
+
+COMMENT ON COLUMN entities.id IS 'Unique ID of the entity';
+COMMENT ON COLUMN entities.tenant_id IS 'The tenant ID of this entity';
+COMMENT ON COLUMN entities.context_id IS 'The entity ID of the context owning this entity';
+COMMENT ON COLUMN entities.type IS 'The type of the entity, e.g. a group';
+COMMENT ON COLUMN entities.value IS 'The value of the entity, e.g. developer';
+COMMENT ON COLUMN entities.display_name IS 'The display name of the entity';
+COMMENT ON COLUMN entities.versions IS 'A JSON object to manage resource relations associated with the entity';
+COMMENT ON COLUMN entities.attributes IS 'A JSON object of additional attributes associated with the entity';
+COMMENT ON COLUMN entities.external_id IS 'The external ID of the entity';
+COMMENT ON COLUMN entities.created IS 'When this entity was created';
+COMMENT ON COLUMN entities.updated IS 'When this entity was last updated';
+COMMENT ON COLUMN entities.deleted IS 'When this entity was deleted, NULL otherwise';
+COMMENT ON COLUMN entities.version IS 'The version of the entity';
+
+INSERT INTO entities (id, tenant_id, context_id, type, value, display_name, versions, attributes, created, updated, version)
+VALUES ('__GLOBAL__', '__ROOT__', '__GLOBAL__', '__SYSTEM__', '__GLOBAL__', 'Global context (e.g. for context entities)', '{}', '{}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '1');
+
+CREATE TABLE entity_relations (
+    id                    VARCHAR(64)   NOT NULL PRIMARY KEY,
+    source_entity_id      VARCHAR(64)   NOT NULL,
+    target_entity_id      VARCHAR(64)   NOT NULL,
+    type                  VARCHAR(64)   NOT NULL,
+    tenant_id             VARCHAR(64)   NULL,
+    created               TIMESTAMP     NOT NULL,
+    attributes            JSONB         NULL,
+    CONSTRAINT "FK_ENTITY_RELATIONS_SOURCE_ENTITY_ID" FOREIGN KEY (source_entity_id) REFERENCES entities (id),
+    CONSTRAINT "FK_ENTITY_RELATIONS_TARGET_ENTITY_ID" FOREIGN KEY (target_entity_id) REFERENCES entities (id)
+);
+
+-- These two indexes will be used to efficiently enforce the foreign keys.
+CREATE UNIQUE INDEX "IDX_ENTITY_RELATIONS_BUSINESS_KEY" ON entity_relations (source_entity_id, type, target_entity_id);
+CREATE UNIQUE INDEX "IDX_ENTITY_RELATIONS_REVERSE_BUSINESS_KEY" ON entity_relations (target_entity_id, type, source_entity_id);
+
+COMMENT ON COLUMN entity_relations.id IS 'Unique ID of the entity relation';
+COMMENT ON COLUMN entity_relations.source_entity_id IS 'ID of the source entity of the relation';
+COMMENT ON COLUMN entity_relations.target_entity_id IS 'ID of the target entity of the relation';
+COMMENT ON COLUMN entity_relations.type IS 'The relation type';
+COMMENT ON COLUMN entity_relations.tenant_id IS 'The tenant ID of this entity relation';
+COMMENT ON COLUMN entity_relations.created IS 'When this entity relation was created';
+COMMENT ON COLUMN entity_relations.attributes IS 'A JSON object of additional attributes associated with the entity relation';
+
+CREATE TABLE account_resource_relations (
+    id                VARCHAR(64)  NOT NULL PRIMARY KEY,
+    account_id        VARCHAR(64)  NOT NULL,
+    tenant_id         VARCHAR(64)  NULL,
+    entity_id         VARCHAR(64)  NOT NULL,
+    type              VARCHAR(64)  NOT NULL,
+    relation_version  INTEGER      NOT NULL,
+    status            VARCHAR(16)  NOT NULL DEFAULT 'ACTIVE',
+    not_before        TIMESTAMP    NULL,
+    expires           TIMESTAMP    NULL,
+    attributes        JSONB        NULL,
+    created           TIMESTAMP    NOT NULL,
+    updated           TIMESTAMP    NOT NULL,
+    version           VARCHAR(64)  NOT NULL DEFAULT '1',
+    CONSTRAINT "FK_ACCOUNT_RESOURCE_RELATIONS_ENTITIES_ENTITY_ID" FOREIGN KEY (entity_id) REFERENCES entities (id)
+);
+
+CREATE UNIQUE INDEX "IDX_ACCOUNT_RESOURCE_RELATIONS_BUSINESS_KEY" ON account_resource_relations (tenant_id, account_id, entity_id, type, relation_version);
+CREATE UNIQUE INDEX "IDX_ACCOUNT_RESOURCE_RELATIONS_BUSINESS_KEY_DEFAULT" ON account_resource_relations (account_id, entity_id, type, relation_version) WHERE tenant_id IS NULL;
+-- Postgres does not automatically create an index for foreign keys, the index must be created by hand for improved performance.
+CREATE INDEX "IDX_ACCOUNT_RESOURCE_RELATIONS_ENTITY_ID_TYPE" ON account_resource_relations(entity_id, type);
+
+COMMENT ON COLUMN account_resource_relations.id IS 'Unique ID of the relation';
+COMMENT ON COLUMN account_resource_relations.account_id IS 'The account ID of the relation';
+COMMENT ON COLUMN account_resource_relations.tenant_id IS 'The tenant ID of this relation. Must match tenant_id of the account_id';
+COMMENT ON COLUMN account_resource_relations.entity_id IS 'The entity ID associated to the account';
+COMMENT ON COLUMN account_resource_relations.type IS 'The relation type';
+COMMENT ON COLUMN account_resource_relations.relation_version IS 'The relation version when this relation was created';
+COMMENT ON COLUMN account_resource_relations.status IS 'The status of the relation from {''ACTIVE'', ''REVOKED''}';
+COMMENT ON COLUMN account_resource_relations.not_before IS 'The moment before which the relation is not valid';
+COMMENT ON COLUMN account_resource_relations.expires IS 'The moment after which the relation is not valid';
+COMMENT ON COLUMN account_resource_relations.attributes IS 'A JSON object of additional attributes associated with the relation';
+COMMENT ON COLUMN account_resource_relations.created IS 'When this relation was created';
+COMMENT ON COLUMN account_resource_relations.updated IS 'When this relation was last updated';
+COMMENT ON COLUMN account_resource_relations.version IS 'The version of the relation';
+
+CREATE TABLE database_client_resource_relations (
+    id                 VARCHAR(64)  NOT NULL PRIMARY KEY,
+    database_client_id VARCHAR(64)  NOT NULL,
+    tenant_id          VARCHAR(64)  NULL,
+    entity_id          VARCHAR(64)  NOT NULL,
+    type               VARCHAR(64)  NOT NULL,
+    relation_version   INTEGER      NOT NULL,
+    status             VARCHAR(16)  NOT NULL DEFAULT 'ACTIVE',
+    not_before         TIMESTAMP    NULL,
+    expires            TIMESTAMP    NULL,
+    attributes         JSONB        NULL,
+    created            TIMESTAMP    NOT NULL,
+    updated            TIMESTAMP    NOT NULL,
+    version            VARCHAR(64)  NOT NULL DEFAULT '1',
+    CONSTRAINT "FK_DATABASE_CLIENT_RESOURCE_RELATIONS_ENTITIES_ID" FOREIGN KEY (entity_id) REFERENCES entities (id)
+);
+
+CREATE UNIQUE INDEX "IDX_DATABASE_CLIENT_RESOURCE_RELATIONS_BUSINESS_KEY" ON database_client_resource_relations (tenant_id, database_client_id, entity_id, type, relation_version);
+CREATE UNIQUE INDEX "IDX_DATABASE_CLIENT_RESOURCE_RELATIONS_BUSINESS_KEY_DEFAULT" ON database_client_resource_relations (database_client_id, entity_id, type, relation_version) WHERE tenant_id IS NULL;
+-- Postgres does not automatically create an index for foreign keys, the index must be created by hand for improved performance.
+CREATE INDEX "IDX_DATABASE_CLIENT_RESOURCE_RELATIONS_ENTITY_ID_TYPE" ON database_client_resource_relations(entity_id, type);
+
+COMMENT ON COLUMN database_client_resource_relations.id IS 'Unique ID of the relation';
+COMMENT ON COLUMN database_client_resource_relations.database_client_id IS 'The database client ID of the relation';
+COMMENT ON COLUMN database_client_resource_relations.tenant_id IS 'The tenant ID of this relation. Must match tenant_id of the database_client_id';
+COMMENT ON COLUMN database_client_resource_relations.entity_id IS 'The entity ID associated to the database client';
+COMMENT ON COLUMN database_client_resource_relations.type IS 'The relation type';
+COMMENT ON COLUMN database_client_resource_relations.relation_version IS 'The relation version when this relation was created';
+COMMENT ON COLUMN database_client_resource_relations.status IS 'The status of the relation from {''ACTIVE'', ''REVOKED''}';
+COMMENT ON COLUMN database_client_resource_relations.not_before IS 'The moment before which the relation is not valid';
+COMMENT ON COLUMN database_client_resource_relations.expires IS 'The moment after which the relation is not valid';
+COMMENT ON COLUMN database_client_resource_relations.attributes IS 'A JSON object of additional attributes associated with the relation';
+COMMENT ON COLUMN database_client_resource_relations.created IS 'When this relation was created';
+COMMENT ON COLUMN database_client_resource_relations.updated IS 'When this relation was last updated';
+COMMENT ON COLUMN database_client_resource_relations.version IS 'The version of the relation';
 
 /*
  * Restore some backed up users for testing
  */
-COPY accounts (account_id, username, password, email, phone, attributes, active, created, updated) FROM stdin;
-59aa5d82-4191-4f79-ba92-3ecb5720a135	dana	\N	dana@demo.example	01111	{"name": {"givenName": "Dana", "familyName": "Demo"}, "emails": [{"value": "dana@demo.example", "primary": true}], "customerId": "2099", "region": "USA", "roles": [{"value": "customer", "primary": true}], "agreeToTerms": "on", "phoneNumbers": [{"value": "01111", "primary": true}], "urn:se:curity:scim:2.0:Devices": []}	1	1713884200	1713884200
-cdb976b0-08f9-4a10-8e31-5a5577697a61	kim	\N	kim@demo.example	02222	{"name": {"givenName": "Kim", "familyName": "Test"}, "emails": [{"value": "kim@demo.example", "primary": true}], "customerId": "7791", "region": "USA", "roles": [{"value": "admin", "primary": true}], "agreeToTerms": "on", "phoneNumbers": [{"value": "02222", "primary": true}], "urn:se:curity:scim:2.0:Devices": []}	1	1713884223	1713884223
+COPY accounts (account_id, username, email, phone, attributes, active, created, updated) FROM stdin;
+59aa5d82-4191-4f79-ba92-3ecb5720a135	dana	dana@demo.example	01111	{"name": {"givenName": "Dana", "familyName": "Demo"}, "emails": [{"value": "dana@demo.example", "primary": true}], "customerId": "2099", "region": "USA", "roles": [{"value": "customer", "primary": true}], "agreeToTerms": "on", "phoneNumbers": [{"value": "01111", "primary": true}], "urn:se:curity:scim:2.0:Devices": []}	1	1713884200	1713884200
+cdb976b0-08f9-4a10-8e31-5a5577697a61	kim	kim@demo.example	02222	{"name": {"givenName": "Kim", "familyName": "Test"}, "emails": [{"value": "kim@demo.example", "primary": true}], "customerId": "7791", "region": "USA", "roles": [{"value": "admin", "primary": true}], "agreeToTerms": "on", "phoneNumbers": [{"value": "02222", "primary": true}], "urn:se:curity:scim:2.0:Devices": []}	1	1713884223	1713884223
 \.
 
 COPY credentials (id, subject, password, attributes, created, updated) FROM stdin;
