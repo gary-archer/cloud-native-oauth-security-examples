@@ -19,7 +19,7 @@ import {merge} from 'webpack-merge';
 import baseConfig from './webpack.common.js';
 
 const prodConfig: webpack.Configuration = {
-  mode: 'production',
+    mode: 'production',
 };
 
 export default merge(baseConfig, prodConfig);

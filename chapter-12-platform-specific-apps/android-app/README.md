@@ -18,8 +18,7 @@ After user authentication the app shows how to run API requests, token refresh a
 
 ## Configuration
 
-The app uses the following configuration, with HTTP endpoints to reduce infrastructure so that you can focus on the code.\
-You can repoint the app to your own authorization server that uses HTTPS URLs.
+The app uses the following configuration settings:
 
 ```kotlin
 object Configuration {

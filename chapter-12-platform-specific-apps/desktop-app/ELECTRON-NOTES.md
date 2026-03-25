@@ -32,10 +32,6 @@ Both the main and renderer processes are built to JavaScript EcmaScript bundles 
 The main and renderer processes can use different `tsconfig.json` files to produce JavaScript from TypeScript.\
 These assets could be packaged into an installer program to deploy the app.
 
-## Issues
-
-- We use Electron 31 until [this macOS issue](https://github.com/electron/electron/issues/43415) gets fixed.
-
 ### Running on Linux
  
 In some Linux environments, Electron may output this error when running a development build of the app:

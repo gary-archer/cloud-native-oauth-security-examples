@@ -70,9 +70,9 @@ The API denies access unless you supply a JWT access token that passes all secur
 ```text
 HTTP/1.1 401 Unauthorized
 X-Powered-By: Express
-WWW-Authenticate: Bearer, error=invalid_token, error_description=issing, invalid or expired access token
+WWW-Authenticate: Bearer, error=invalid_token, error_description=Missing, invalid or expired access token
 
-{"status":401,"code":"invalid_token","message":"issing, invalid or expired access token"}
+{"status":401,"code":"invalid_token","message":"Missing, invalid or expired access token"}
 ```
 
 ### Test the API
