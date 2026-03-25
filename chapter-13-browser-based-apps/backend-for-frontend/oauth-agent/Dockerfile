@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim
+FROM node:22-bookworm-slim
 
 WORKDIR /usr/oauth-agent
 COPY dist                /usr/oauth-agent/dist

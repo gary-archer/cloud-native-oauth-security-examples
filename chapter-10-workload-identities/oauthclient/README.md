@@ -109,7 +109,6 @@ SERVICE_ACCOUNT_TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token
 curl -s -X POST http://curity-idsvr-runtime-svc.authorizationserver:8443/oauth/v2/oauth-token \
      -H 'Content-Type: application/x-www-form-urlencoded' \
      -d 'grant_type=client_credentials' \
-     -d 'client_id=oauthclient' \
      -d "client_assertion=$SERVICE_ACCOUNT_TOKEN" \
      -d 'client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer' \
      -d 'scope=products' | jq

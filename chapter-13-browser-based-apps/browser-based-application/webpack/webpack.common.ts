@@ -14,48 +14,73 @@
  *  limitations under the License.
  */
 
+import CopyPlugin from 'copy-webpack-plugin';
 import path from 'path';
 import webpack from 'webpack';
 
 const dirname = process.cwd();
 const config: webpack.Configuration = {
 
-  context: path.resolve(dirname, './src'),
-  target: ['web'],
+    context: path.resolve(dirname, '.'),
+    target: ['web'],
 
-  entry: {
-    app: ['./index.tsx']
-  },
-  module: {
+    entry: {
+        app: ['./src/index.tsx']
+    },
+    module: {
 
-    rules: [
-      {
-        test: /\.(ts|tsx)$/,
-        use: 'ts-loader',
-        exclude: /node_modules/
-      }
+        rules: [
+            {
+                test: /\.(ts|tsx)$/,
+                use: 'ts-loader',
+                exclude: /node_modules/
+            }
+        ]
+    },
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js']
+    },
+    experiments: {
+        outputModule: true,
+    },
+    output: {
+        path: path.resolve(dirname, './dist'),
+        filename: `[name].bundle.js`,
+        module: true,
+        clean: true,
+    },
+    optimization: {
+
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    chunks: 'initial',
+                    name: 'vendor',
+                    test: /node_modules/,
+                    enforce: true
+                },
+            }
+        }
+    },
+    plugins: [
+
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: 'index.html',
+                    to: path.resolve('dist'),
+                },
+                {
+                    from: 'css',
+                    to: path.resolve('dist'),
+                },
+                {
+                    from: 'config.json',
+                    to: path.resolve('dist'),
+                },
+            ]
+        }),
     ]
-  },
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js']
-  },
-  output: {
-    path: path.resolve(dirname, './dist'),
-    filename: `[name].bundle.js`,
-  },
-  optimization: {
-
-    splitChunks: {
-      cacheGroups: {
-        vendor: {
-          chunks: 'initial',
-          name: 'vendor',
-          test: /node_modules/,
-          enforce: true
-        },
-      }
-    }
-  }
 };
 
 export default config;
